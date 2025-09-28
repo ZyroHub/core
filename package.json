@@ -1,11 +1,11 @@
 {
 	"name": "@zyrohub/core",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"author": "DMVMarcio",
 	"type": "module",
 	"description": "The core module of ZyroHub ecosystem.",
 	"main": "./dist/index.js",
-	"types": "./dist/declarations/index.d.ts",
+	"types": "./dist/index.d.ts",
 	"scripts": {
 		"build": "tsc && tsc-alias"
 	},
