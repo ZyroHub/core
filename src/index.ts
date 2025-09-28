@@ -1,3 +1,4 @@
+export * from './Cluster.js';
 export * from './Core.js';
 
 export * from './components/index.js';

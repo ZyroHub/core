@@ -8,8 +8,8 @@ import { Provider, ProvidersService } from './services/Providers.js';
 import { Terminal } from './utils/Terminal.js';
 
 interface CoreEvents {
-	ready: (core: Core) => void;
-	moduleInit: (module: BaseModule) => void;
+	ready: (data: { core: Core }) => void;
+	moduleInit: (data: { module: BaseModule }) => void;
 }
 
 export declare interface Core {
@@ -17,9 +17,14 @@ export declare interface Core {
 	emit<T extends keyof CoreEvents>(event: T, ...args: Parameters<CoreEvents[T]>): boolean;
 }
 
+export interface CoreOptionsMeta {
+	isWorker?: boolean;
+}
+
 export interface CoreOptions {
 	modules?: (typeof BaseModule | MountedModule)[];
 	providers?: Provider[];
+	meta?: CoreOptionsMeta;
 }
 
 export class Core extends EventEmitter {
@@ -31,6 +36,8 @@ export class Core extends EventEmitter {
 	private modules: MountedModule[] = [];
 
 	public providers = new ProvidersService();
+
+	public meta: CoreOptionsMeta = {};
 
 	constructor(options: CoreOptions = {}) {
 		super({});
@@ -47,6 +54,10 @@ export class Core extends EventEmitter {
 			for (const provider of options.providers) {
 				this.providers.register(provider);
 			}
+		}
+
+		if (options.meta) {
+			this.meta = options.meta;
 		}
 
 		if (!Core.instance) Core.instance = this;
@@ -70,7 +81,7 @@ export class Core extends EventEmitter {
 					)} ${ansicolor.darkGray(`(${ms(duration)})`)}`
 				);
 
-				this.emit('moduleInit', module.instance);
+				this.emit('moduleInit', { module: module.instance });
 			} catch (error) {
 				Terminal.error('CORE', [`Failed to initialize module: ${module.constructor.name}\n`, error]);
 			}
@@ -113,6 +124,6 @@ export class Core extends EventEmitter {
 
 		Terminal.success('CORE', 'Successfully initialized.');
 
-		this.emit('ready', this);
+		this.emit('ready', { core: this });
 	}
 }
