@@ -131,3 +131,5 @@ export class Core extends EventEmitter {
 		this.emit('ready', { core: this });
 	}
 }
+
+export default { Core };

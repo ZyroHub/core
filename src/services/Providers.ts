@@ -39,3 +39,5 @@ export class ProvidersService {
 		return new constructor(...dependencies);
 	}
 }
+
+export default { ProvidersService };

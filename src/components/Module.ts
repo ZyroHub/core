@@ -31,3 +31,5 @@ export class BaseModule {
 
 	async init(data: { core: Core; options: any }) {}
 }
+
+export default { BaseModule };

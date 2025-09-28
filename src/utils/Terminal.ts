@@ -44,3 +44,5 @@ export class Terminal {
 		this.log(flag, ansicolor.lightYellow, content);
 	}
 }
+
+export default { Terminal };

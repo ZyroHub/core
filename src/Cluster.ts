@@ -132,3 +132,5 @@ export class ClusteredCore extends EventEmitter {
 		}
 	}
 }
+
+export default { ClusteredCore };
