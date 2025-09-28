@@ -73,7 +73,13 @@ export class ClusteredCore extends EventEmitter {
 	}
 
 	private async initWorker() {
-		const core = new Core(this.options.core);
+		const core = new Core({
+			...this.options.core,
+			meta: {
+				...this.options.core.meta,
+				isWorker: true
+			}
+		});
 
 		await core.init();
 	}
