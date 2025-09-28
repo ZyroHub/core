@@ -68,6 +68,10 @@ export class Core extends EventEmitter {
 			try {
 				if (!module.instance) throw new Error('Module instance is not defined');
 
+				module.instance.core = this;
+
+				Terminal.info('CORE', `Initializing module: ${ansicolor.cyan(module.instance.getName())}...`);
+
 				const startedAt = Date.now();
 				await module.instance.init({ core: this, options: module.options });
 				const duration = Date.now() - startedAt;

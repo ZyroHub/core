@@ -8,6 +8,9 @@ export type MountedModule<T = any> = {
 
 export class BaseModule {
 	static options: any;
+
+	public core?: Core;
+
 	public name?: string;
 	public initialized: boolean = false;
 
