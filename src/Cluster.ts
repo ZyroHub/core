@@ -39,6 +39,11 @@ export interface ClusteredCoreWorker {
 }
 
 export class ClusteredCore extends EventEmitter {
+	public isPrimary: boolean = cluster.isPrimary;
+	public isWorker: boolean = cluster.isWorker;
+
+	public actualCore: Core | null = null;
+
 	workers: Record<number, ClusteredCoreWorker> = {};
 
 	constructor(public options: ClusteredCoreOptions) {
@@ -80,6 +85,8 @@ export class ClusteredCore extends EventEmitter {
 				isWorker: true
 			}
 		});
+
+		this.actualCore = core;
 
 		await core.init();
 	}
