@@ -1,3 +1,4 @@
+import { Terminal } from '@zyrohub/utilities';
 import ansicolor from 'ansicolor';
 import ms from 'ms';
 import cluster, { Worker } from 'node:cluster';
@@ -6,7 +7,6 @@ import os from 'node:os';
 import process from 'node:process';
 
 import { Core, CoreOptions } from './Core.js';
-import { Terminal } from './utils/Terminal.js';
 
 interface ClusteredCoreEvents {
 	ready: (data: { clusteredCore: ClusteredCore }) => void;

@@ -11,6 +11,9 @@ importers:
       '@zyrohub/config-prettier':
         specifier: ^1.0.1
         version: 1.0.1(prettier@3.6.2)
+      '@zyrohub/utilities':
+        specifier: ^1.0.0
+        version: 1.0.0(prettier@3.6.2)
       ansicolor:
         specifier: ^2.0.3
         version: 2.0.3
@@ -124,6 +127,9 @@ packages:
     resolution: {integrity: sha512-EXrtliR4YNbCm+mT0O4378RXySW3ZBOWzK3VT9FAW/hFBUNhfJ42D7FFciujSL/lF6hRML1eBCRiPn7uPStOyA==}
     peerDependencies:
       prettier: ^3.6.2
+
+  '@zyrohub/utilities@1.0.0':
+    resolution: {integrity: sha512-9ucPG3TmDW5tkynBQmjhsdbXCmAjfCYwBS1JV5AR3fTdfAaOSCHtXnnza9AUORLfOHqtprqk91Aiu7z7HK7t8A==}
 
   ansicolor@2.0.3:
     resolution: {integrity: sha512-pzusTqk9VHrjgMCcTPDTTvfJfx6Q3+L5tQ6yKC8Diexmoit4YROTFIkxFvRTNL9y5s0Q8HrSrgerCD5bIC+Kiw==}
@@ -409,6 +415,17 @@ snapshots:
       prettier: 3.6.2
     transitivePeerDependencies:
       - '@vue/compiler-sfc'
+      - prettier-plugin-svelte
+      - supports-color
+      - svelte
+
+  '@zyrohub/utilities@1.0.0(prettier@3.6.2)':
+    dependencies:
+      '@zyrohub/config-prettier': 1.0.1(prettier@3.6.2)
+      ansicolor: 2.0.3
+    transitivePeerDependencies:
+      - '@vue/compiler-sfc'
+      - prettier
       - prettier-plugin-svelte
       - supports-color
       - svelte

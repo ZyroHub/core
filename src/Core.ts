@@ -1,3 +1,4 @@
+import { Terminal } from '@zyrohub/utilities';
 import ansicolor from 'ansicolor';
 import ms from 'ms';
 import EventEmitter from 'node:events';
@@ -5,7 +6,6 @@ import 'reflect-metadata';
 
 import { BaseModule, MountedModule } from './components/Module.js';
 import { Provider, ProvidersService } from './services/Providers.js';
-import { Terminal } from './utils/Terminal.js';
 
 interface CoreEvents {
 	ready: (data: { core: Core }) => void;
