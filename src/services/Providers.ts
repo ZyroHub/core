@@ -1,13 +1,13 @@
-export type Provider = { new (...args: any[]): any };
+export type ProviderType = { new (...args: any[]): any };
 
 export class ProvidersService {
-	private providers: Map<Provider, InstanceType<Provider>> = new Map();
+	private providers: Map<ProviderType, InstanceType<ProviderType>> = new Map();
 
-	resolve<T extends Provider>(provider: T): InstanceType<T> | undefined {
+	resolve<T extends ProviderType>(provider: T): InstanceType<T> | undefined {
 		return this.providers.get(provider) as InstanceType<T>;
 	}
 
-	register(provider: Provider) {
+	register(provider: ProviderType) {
 		const isProvider = Reflect.getMetadata('provider:isProvider', provider);
 		if (!isProvider) throw new Error('Invalid provider');
 
@@ -20,19 +20,19 @@ export class ProvidersService {
 		return instance;
 	}
 
-	registerInstance(provider: Provider, instance: InstanceType<Provider>) {
+	registerInstance(provider: ProviderType, instance: InstanceType<ProviderType>) {
 		this.providers.set(provider, instance);
 	}
 
-	unregister(provider: Provider) {
+	unregister(provider: ProviderType) {
 		this.providers.delete(provider);
 	}
 
-	resolveClasses(providers: Provider[]) {
+	resolveClasses(providers: ProviderType[]) {
 		return providers.map(provider => this.resolve(provider));
 	}
 
-	initClassWithProviders<T extends Provider>(constructor: T): InstanceType<T> {
+	initClassWithProviders<T extends ProviderType>(constructor: T): InstanceType<T> {
 		const providerParams = Reflect.getMetadata('design:paramtypes', constructor) || [];
 		const dependencies = this.resolveClasses(providerParams);
 

@@ -5,7 +5,7 @@ import EventEmitter from 'node:events';
 import 'reflect-metadata';
 
 import { BaseModule, MountedModule } from './components/Module.js';
-import { Provider, ProvidersService } from './services/Providers.js';
+import { ProviderType, ProvidersService } from './services/Providers.js';
 
 interface CoreEvents {
 	ready: (data: { core: Core }) => void;
@@ -23,7 +23,7 @@ export interface CoreOptionsMeta {
 
 export interface CoreOptions {
 	modules?: (typeof BaseModule | MountedModule)[];
-	providers?: Provider[];
+	providers?: ProviderType[];
 	meta?: CoreOptionsMeta;
 }
 
