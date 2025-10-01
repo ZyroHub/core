@@ -21,7 +21,6 @@
 	- [Importing a Module into another Module](#importing-a-module-into-another-module)
 	- [Getting the Global Core Instance](#getting-the-global-core-instance)
 - [Providers](#providers)
-		- [Observation: The `Core` instance is already registered as a provider automatically.](#observation-the-core-instance-is-already-registered-as-a-provider-automatically)
 	- [Creating a Provider](#creating-a-provider)
 	- [Importing your Provider in Core](#importing-your-provider-in-core)
 - [Events](#events)
@@ -164,7 +163,7 @@ const someFunction = () => {
 
 The provider system allows modules to register and retrieve services or instances globally within the core ecosystem.
 
-#### Observation: The `Core` instance is already registered as a provider automatically.
+- Observation: The `Core` instance is already registered as a provider automatically.
 
 ### Creating a Provider
 
