@@ -7,26 +7,29 @@
 <p>This is the core module of ZyroHub ecosystem, providing modules and services for building and managing applications.</p>
 
 ## Table of Contents
+
 - [ZyroHub - Core](#zyrohub---core)
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
 - [Basic Usage](#basic-usage)
-	- [Creating a Core Instance and importing Modules](#creating-a-core-instance-and-importing-modules)
-	- [Creating a Core Instance with Cluster Support](#creating-a-core-instance-with-cluster-support)
-		- [Cluster Options](#cluster-options)
+    - [Creating a Core Instance and importing Modules](#creating-a-core-instance-and-importing-modules)
+    - [Creating a Core Instance with Cluster Support](#creating-a-core-instance-with-cluster-support)
+        - [Cluster Options](#cluster-options)
 - [Creating Modules](#creating-modules)
-	- [Basic Module Structure](#basic-module-structure)
-	- [Importing your Module into Core](#importing-your-module-into-core)
-	- [Importing a Module into another Module](#importing-a-module-into-another-module)
-	- [Getting the Global Core Instance](#getting-the-global-core-instance)
+    - [Basic Module Structure](#basic-module-structure)
+    - [Importing your Module into Core](#importing-your-module-into-core)
+    - [Importing a Module into another Module](#importing-a-module-into-another-module)
+    - [Getting the Global Core Instance](#getting-the-global-core-instance)
 - [Events](#events)
-	- [Core Events](#core-events)
-		- [Ready Event](#ready-event)
-		- [Module Initialized Event](#module-initialized-event)
+    - [Core Events](#core-events)
+        - [Ready Event](#ready-event)
+        - [Module Initialized Event](#module-initialized-event)
 
 ## Getting Started
 
 To install the core module, use one of the following package managers:
+
+[NPM Repository](https://www.npmjs.com/package/@zyrohub/core)
 
 ```bash
 # npm
@@ -46,11 +49,10 @@ bun add @zyrohub/core
 The modules are automatically initialized in order when the core instance is created. You can import and use other modules from the ZyroHub ecosystem (or custom modules) as needed.
 
 ```typescript
+import { AnotherModule } from '@zyrohub/another-module';
 import { Core } from '@zyrohub/core';
-
 // Example modules
 import { SomeModule } from '@zyrohub/some-module';
-import { AnotherModule } from '@zyrohub/another-module';
 
 const core = new Core({
 	modules: [SomeModule, AnotherModule]
@@ -64,10 +66,9 @@ core.init();
 You can also create a Clustered Core instance to take advantage of multi-core systems. The clustered core will automatically manage worker processes for you.
 
 ```typescript
-import { ClusteredCore } from '@zyrohub/core';
-
 // Example modules
 import { AnotherModule } from '@zyrohub/another-module';
+import { ClusteredCore } from '@zyrohub/core';
 import { SomeModule } from '@zyrohub/some-module';
 
 const core = new ClusteredCore({
@@ -81,11 +82,12 @@ core.init();
 ```
 
 #### Cluster Options
-* `cpus`: (default: number of available CPU cores) Number of CPU cores to use.
-* `workers`: Additional arguments to pass to worker processes.
-  * `autoRestart`: Configuration for automatic worker restarts.
-    * `enabled`: (default: true) Whether to enable automatic restarts.
-    * `delay`: (default: 5000) Delay in milliseconds before restarting a worker.
+
+- `cpus`: (default: number of available CPU cores) Number of CPU cores to use.
+- `workers`: Additional arguments to pass to worker processes.
+    - `autoRestart`: Configuration for automatic worker restarts.
+        - `enabled`: (default: true) Whether to enable automatic restarts.
+        - `delay`: (default: 5000) Delay in milliseconds before restarting a worker.
 
 ## Creating Modules
 
