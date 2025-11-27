@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@zyrohub/config-prettier':
-        specifier: ^1.0.1
-        version: 1.0.1(prettier@3.6.2)
       '@zyrohub/utilities':
         specifier: ^1.0.0
         version: 1.0.0(prettier@3.6.2)
@@ -30,6 +27,9 @@ importers:
       '@types/node':
         specifier: ^24.5.2
         version: 24.5.2
+      '@zyrohub/config-prettier':
+        specifier: ^1.0.5
+        version: 1.0.5(prettier@3.6.2)
       tsc-alias:
         specifier: ^1.8.16
         version: 1.8.16
@@ -123,8 +123,8 @@ packages:
   '@types/node@24.5.2':
     resolution: {integrity: sha512-FYxk1I7wPv3K2XBaoyH2cTnocQEu8AOZ60hPbsyukMPLv5/5qr7V1i8PLHdl6Zf87I+xZXFvPCXYjiTFq+YSDQ==}
 
-  '@zyrohub/config-prettier@1.0.1':
-    resolution: {integrity: sha512-EXrtliR4YNbCm+mT0O4378RXySW3ZBOWzK3VT9FAW/hFBUNhfJ42D7FFciujSL/lF6hRML1eBCRiPn7uPStOyA==}
+  '@zyrohub/config-prettier@1.0.5':
+    resolution: {integrity: sha512-N/rjmLTVq779jAP8+8jhbOMQNL12515mXe7TEtYe3i9wDiHyaoI2aDBNp21A750rDdTpYDrt8Hz8xeVcAEVWRA==}
     peerDependencies:
       prettier: ^3.6.2
 
@@ -409,7 +409,7 @@ snapshots:
     dependencies:
       undici-types: 7.12.0
 
-  '@zyrohub/config-prettier@1.0.1(prettier@3.6.2)':
+  '@zyrohub/config-prettier@1.0.5(prettier@3.6.2)':
     dependencies:
       '@trivago/prettier-plugin-sort-imports': 5.2.2(prettier@3.6.2)
       prettier: 3.6.2
@@ -421,7 +421,7 @@ snapshots:
 
   '@zyrohub/utilities@1.0.0(prettier@3.6.2)':
     dependencies:
-      '@zyrohub/config-prettier': 1.0.1(prettier@3.6.2)
+      '@zyrohub/config-prettier': 1.0.5(prettier@3.6.2)
       ansicolor: 2.0.3
     transitivePeerDependencies:
       - '@vue/compiler-sfc'
