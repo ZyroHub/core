@@ -33,6 +33,8 @@ export class BaseModule {
 	}
 
 	async init(data: { core: Core; options: any }) {}
+
+	async destroy() {}
 }
 
 export default { BaseModule };

@@ -9,6 +9,7 @@ import { ProvidersService, ProviderToken } from './services/Providers.js';
 interface CoreEvents {
 	ready: (data: { core: Core }) => void;
 	moduleInit: (data: { module: BaseModule }) => void;
+	shutdown: () => void;
 }
 
 export declare interface Core {
@@ -24,6 +25,8 @@ export interface CoreOptions {
 	modules?: (typeof BaseModule | MountedModule)[];
 	providers?: any[];
 	meta?: CoreOptionsMeta;
+
+	enableGracefulShutdown?: boolean;
 }
 
 export class Core extends EventEmitter {
@@ -37,6 +40,8 @@ export class Core extends EventEmitter {
 	public providers = new ProvidersService();
 
 	public meta: CoreOptionsMeta = {};
+
+	private enableGracefulShutdown: boolean = true;
 
 	constructor(options: CoreOptions = {}) {
 		super({});
@@ -57,6 +62,10 @@ export class Core extends EventEmitter {
 
 		if (options.meta) {
 			this.meta = options.meta;
+		}
+
+		if (options.enableGracefulShutdown !== undefined) {
+			this.enableGracefulShutdown = options.enableGracefulShutdown;
 		}
 
 		if (!Core.instance) Core.instance = this;
@@ -92,9 +101,30 @@ export class Core extends EventEmitter {
 
 				this.emit('moduleInit', { module: module.instance });
 			} catch (error) {
-				Terminal.error('CORE', [`Failed to initialize module: ${module.constructor.name}\n`, error]);
+				this.handleModuleError(module, error);
 			}
 		}
+	}
+
+	private handleModuleError(module: MountedModule, error: unknown) {
+		const moduleName = module.instance?.getName() || module.constructor.name;
+
+		Terminal.error('CORE', [`Failed to initialize module: ${moduleName}`, error]);
+
+		process.exit(1);
+	}
+
+	private setupGracefulShutdown() {
+		if (!this.enableGracefulShutdown) return;
+
+		const shutdownHandler = async (signal: string) => {
+			Terminal.warn('CORE', `Received signal ${signal}. Shutting down gracefully...`);
+			await this.shutdown();
+			process.exit(0);
+		};
+
+		process.on('SIGINT', () => shutdownHandler('SIGINT'));
+		process.on('SIGTERM', () => shutdownHandler('SIGTERM'));
 	}
 
 	registerModule(module: typeof BaseModule | MountedModule) {
@@ -138,8 +168,27 @@ export class Core extends EventEmitter {
 		return Core.instance || new Core(options);
 	}
 
+	async shutdown() {
+		Terminal.info('CORE', 'Shutting down modules...');
+
+		for (const module of [...this.modules].reverse()) {
+			if (module.instance && module.instance.initialized) {
+				try {
+					await module.instance.destroy();
+				} catch (error) {
+					Terminal.error('CORE', [`Error shutting down module ${module.instance.getName()}`, error]);
+				}
+			}
+		}
+
+		this.emit('shutdown');
+		Terminal.success('CORE', 'Core shutdown successfully.');
+	}
+
 	async init() {
 		if (this.initialized) return;
+
+		this.setupGracefulShutdown();
 
 		const startedAt = Date.now();
 		await this.initModules();
