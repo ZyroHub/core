@@ -1,4 +1,4 @@
-import { Core } from '@/Core.js';
+import type { Core } from '@/Core.js';
 
 export type MountedModule<T = any> = {
 	constructor: typeof BaseModule;

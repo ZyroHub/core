@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 export * from './Cluster.js';
 export * from './Core.js';
 

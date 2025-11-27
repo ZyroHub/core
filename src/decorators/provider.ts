@@ -1,6 +1,7 @@
 export const PROVIDER_METADATA_KEY = {
 	PROVIDER: 'zyro:provider',
 	INJECT: 'zyro:inject',
+	INJECTABLE: 'zyro:injectable',
 	PARAM_TYPES: 'design:paramtypes'
 };
 
@@ -16,5 +17,11 @@ export function Inject(token: any) {
 		existingInjections[parameterIndex] = token;
 
 		Reflect.defineMetadata(PROVIDER_METADATA_KEY.INJECT, existingInjections, target);
+	};
+}
+
+export function Injectable() {
+	return (target: Function) => {
+		Reflect.defineMetadata(PROVIDER_METADATA_KEY.INJECTABLE, true, target);
 	};
 }

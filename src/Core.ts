@@ -1,7 +1,6 @@
 import { Ansi, Terminal } from '@zyrohub/utilities';
 import ms from 'ms';
 import EventEmitter from 'node:events';
-import 'reflect-metadata';
 
 import { BaseModule, MountedModule } from './components/Module.js';
 import { MODULE_METADATA_KEY } from './decorators/module.js';
