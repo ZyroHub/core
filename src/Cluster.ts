@@ -1,5 +1,4 @@
-import { Terminal } from '@zyrohub/utilities';
-import ansicolor from 'ansicolor';
+import { Ansi, Terminal } from '@zyrohub/utilities';
 import ms from 'ms';
 import cluster, { Worker } from 'node:cluster';
 import EventEmitter from 'node:events';
@@ -73,7 +72,7 @@ export class ClusteredCore extends EventEmitter {
 
 		this.workers[worker.id] = workerData;
 
-		Terminal.info('CLUSTER', `Worker ${ansicolor.cyan(worker.process.pid)} started.`);
+		Terminal.info('CLUSTER', `Worker ${Ansi.cyan(worker.process.pid)} started.`);
 		this.emit('workerInit', { worker: workerData });
 	}
 
@@ -92,7 +91,7 @@ export class ClusteredCore extends EventEmitter {
 	}
 
 	private async initPrimary() {
-		Terminal.success('CLUSTER', `Primary ${ansicolor.cyan(process.pid)} is running.`);
+		Terminal.success('CLUSTER', `Primary ${Ansi.cyan(process.pid)} is running.`);
 
 		const startedAt = Date.now();
 
@@ -107,9 +106,9 @@ export class ClusteredCore extends EventEmitter {
 
 			Terminal.error(
 				'CLUSTER',
-				`Worker ${ansicolor.cyan(worker.process.pid)} died with code: ${ansicolor.yellow(
+				`Worker ${Ansi.cyan(worker.process.pid)} died with code: ${Ansi.yellow(
 					code
-				)}, and signal: ${ansicolor.red(signal)}`
+				)}, and signal: ${Ansi.red(signal)}`
 			);
 
 			if (this.options.settings?.workers?.autoRestart?.enabled) {
@@ -125,7 +124,7 @@ export class ClusteredCore extends EventEmitter {
 
 		Terminal.success(
 			'CLUSTER',
-			`Successfully initialized ${ansicolor.yellow(cpuCount)} workers. ${ansicolor.darkGray(`(${ms(elapsedTime)})`)}`
+			`Successfully initialized ${Ansi.yellow(cpuCount)} workers. ${Ansi.gray(`(${ms(elapsedTime)})`)}`
 		);
 
 		this.emit('ready', { clusteredCore: this });

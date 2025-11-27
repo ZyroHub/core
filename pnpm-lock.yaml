@@ -9,11 +9,8 @@ importers:
   .:
     dependencies:
       '@zyrohub/utilities':
-        specifier: ^1.0.0
-        version: 1.0.0(prettier@3.6.2)
-      ansicolor:
-        specifier: ^2.0.3
-        version: 2.0.3
+        specifier: ^1.0.9
+        version: 1.0.9
       ms:
         specifier: ^2.1.3
         version: 2.1.3
@@ -128,11 +125,8 @@ packages:
     peerDependencies:
       prettier: ^3.6.2
 
-  '@zyrohub/utilities@1.0.0':
-    resolution: {integrity: sha512-9ucPG3TmDW5tkynBQmjhsdbXCmAjfCYwBS1JV5AR3fTdfAaOSCHtXnnza9AUORLfOHqtprqk91Aiu7z7HK7t8A==}
-
-  ansicolor@2.0.3:
-    resolution: {integrity: sha512-pzusTqk9VHrjgMCcTPDTTvfJfx6Q3+L5tQ6yKC8Diexmoit4YROTFIkxFvRTNL9y5s0Q8HrSrgerCD5bIC+Kiw==}
+  '@zyrohub/utilities@1.0.9':
+    resolution: {integrity: sha512-QmUTmACDoQvsjHbWCtEXF8SD9bjue7sOEerGbcfTbZrd3Zch90TXd61XZkSSql5CzGbaDLEHwKVmmnC9hp1ZxA==}
 
   anymatch@3.1.3:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
@@ -419,18 +413,7 @@ snapshots:
       - supports-color
       - svelte
 
-  '@zyrohub/utilities@1.0.0(prettier@3.6.2)':
-    dependencies:
-      '@zyrohub/config-prettier': 1.0.5(prettier@3.6.2)
-      ansicolor: 2.0.3
-    transitivePeerDependencies:
-      - '@vue/compiler-sfc'
-      - prettier
-      - prettier-plugin-svelte
-      - supports-color
-      - svelte
-
-  ansicolor@2.0.3: {}
+  '@zyrohub/utilities@1.0.9': {}
 
   anymatch@3.1.3:
     dependencies:

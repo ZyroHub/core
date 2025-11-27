@@ -1,5 +1,4 @@
-import { Terminal } from '@zyrohub/utilities';
-import ansicolor from 'ansicolor';
+import { Ansi, Terminal } from '@zyrohub/utilities';
 import ms from 'ms';
 import EventEmitter from 'node:events';
 import 'reflect-metadata';
@@ -70,7 +69,7 @@ export class Core extends EventEmitter {
 
 				module.instance.core = this;
 
-				Terminal.info('CORE', `Initializing module: ${ansicolor.cyan(module.instance.getName())}...`);
+				Terminal.info('CORE', `Initializing module: ${Ansi.cyan(module.instance.getName())}...`);
 
 				const startedAt = Date.now();
 				await module.instance.init({ core: this, options: module.options });
@@ -80,9 +79,9 @@ export class Core extends EventEmitter {
 
 				Terminal.success(
 					'CORE',
-					`Successfully initialized module: ${ansicolor.cyan(
+					`Successfully initialized module: ${Ansi.cyan(
 						module.instance.getName()
-					)} ${ansicolor.darkGray(`(${ms(duration)})`)}`
+					)} ${Ansi.gray(`(${ms(duration)})`)}`
 				);
 
 				this.emit('moduleInit', { module: module.instance });
@@ -121,9 +120,9 @@ export class Core extends EventEmitter {
 
 		Terminal.success(
 			'CORE',
-			`Successfully initialized ${ansicolor.yellow(
+			`Successfully initialized ${Ansi.yellow(
 				this.modules.length
-			)} modules. ${ansicolor.darkGray(`(${ms(elapsedTime)})`)}`
+			)} modules. ${Ansi.gray(`(${ms(elapsedTime)})`)}`
 		);
 
 		Terminal.success('CORE', 'Successfully initialized.');
