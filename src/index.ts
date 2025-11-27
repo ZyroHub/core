@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 
+import './__tests__/test.js';
+
 export * from './Cluster.js';
 export * from './Core.js';
 

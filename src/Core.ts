@@ -71,7 +71,7 @@ export class Core extends EventEmitter {
 		if (!Core.instance) Core.instance = this;
 	}
 
-	private async initModules() {
+	private instantiateModules() {
 		for (const module of this.modules) {
 			try {
 				if (!module.instance) {
@@ -82,7 +82,24 @@ export class Core extends EventEmitter {
 
 				module.instance.core = this;
 
-				Terminal.info('CORE', `Initializing module: ${Ansi.cyan(module.instance.getName())}...`);
+				this.providers.registerInstance(module.constructor, module.instance);
+
+				if (module.token) {
+					this.providers.registerInstance(module.token, module.instance);
+				}
+			} catch (error) {
+				this.handleModuleError(module, error);
+			}
+		}
+	}
+
+	private async initializeModules() {
+		for (const module of this.modules) {
+			try {
+				if (!module.instance) continue;
+
+				const moduleName = module.instance.getName();
+				Terminal.info('CORE', `Initializing module: ${Ansi.cyan(moduleName)}...`);
 
 				const startedAt = Date.now();
 				await module.instance.init({ core: this, options: module.options });
@@ -90,17 +107,9 @@ export class Core extends EventEmitter {
 
 				module.instance.initialized = true;
 
-				this.providers.registerInstance(module.constructor, module.instance);
-
-				if (module.token) {
-					this.providers.registerInstance(module.token, module.instance);
-				}
-
 				Terminal.success(
 					'CORE',
-					`Successfully initialized module: ${Ansi.cyan(
-						module.instance.getName()
-					)} ${Ansi.gray(`(${ms(duration)})`)}`
+					`Successfully initialized module: ${Ansi.cyan(moduleName)} ${Ansi.gray(`(${ms(duration)})`)}`
 				);
 
 				this.emit('moduleInit', { module: module.instance });
@@ -111,7 +120,7 @@ export class Core extends EventEmitter {
 	}
 
 	private handleModuleError(module: MountedModule, error: unknown) {
-		const moduleName = module.instance?.getName() || module.constructor.name;
+		const moduleName = module.instance?.getName?.() || module.constructor.name;
 
 		Terminal.error('CORE', [`Failed to initialize module: ${moduleName}`, error]);
 
@@ -132,7 +141,14 @@ export class Core extends EventEmitter {
 	}
 
 	registerModule(module: ModuleClass | MountedModule) {
-		const ModuleConstructor = (module as MountedModule).constructor || module;
+		let ModuleConstructor: ModuleClass;
+
+		if (typeof module === 'function') {
+			ModuleConstructor = module;
+		} else {
+			ModuleConstructor = module.constructor;
+		}
+
 		const isModule = Reflect.getMetadata(MODULE_METADATA_KEY, ModuleConstructor);
 
 		if (!isModule) {
@@ -145,10 +161,10 @@ export class Core extends EventEmitter {
 			return;
 		}
 
-		if ('options' in (module as any)) {
-			this.modules.push(module as MountedModule);
-		} else {
+		if (typeof module === 'function') {
 			this.modules.push((module as ModuleClass).mount({}));
+		} else {
+			this.modules.push(module as MountedModule);
 		}
 	}
 
@@ -176,7 +192,7 @@ export class Core extends EventEmitter {
 		for (const module of [...this.modules].reverse()) {
 			if (module.instance && module.instance.initialized) {
 				try {
-					await module.instance.destroy();
+					await module.instance.shutdown();
 				} catch (error) {
 					Terminal.error('CORE', [`Error shutting down module ${module.instance.getName()}`, error]);
 				}
@@ -193,7 +209,10 @@ export class Core extends EventEmitter {
 		this.setupGracefulShutdown();
 
 		const startedAt = Date.now();
-		await this.initModules();
+
+		this.instantiateModules();
+		await this.initializeModules();
+
 		const elapsedTime = Date.now() - startedAt;
 
 		this.initialized = true;

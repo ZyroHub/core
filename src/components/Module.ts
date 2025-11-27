@@ -38,7 +38,7 @@ export class BaseModule {
 
 	async init(data: { core: Core; options: any }) {}
 
-	async destroy() {}
+	async shutdown() {}
 }
 
 export default { BaseModule };
