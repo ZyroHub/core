@@ -4,6 +4,7 @@ export type MountedModule<T = any> = {
 	constructor: typeof BaseModule;
 	instance?: BaseModule;
 	options: T;
+	token?: any;
 };
 
 export class BaseModule {
@@ -20,12 +21,14 @@ export class BaseModule {
 
 	static mount<TMount extends (typeof BaseModule)['options']>(
 		this: typeof BaseModule & { options: TMount },
-		options: TMount
+		options: TMount,
+		token?: any
 	): MountedModule<TMount> {
 		return {
 			constructor: this,
 			instance: new this(),
-			options
+			options,
+			token
 		};
 	}
 

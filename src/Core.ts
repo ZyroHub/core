@@ -4,7 +4,8 @@ import EventEmitter from 'node:events';
 import 'reflect-metadata';
 
 import { BaseModule, MountedModule } from './components/Module.js';
-import { ProviderType, ProvidersService } from './services/Providers.js';
+import { MODULE_METADATA_KEY } from './decorators/module.js';
+import { ProvidersService, ProviderToken } from './services/Providers.js';
 
 interface CoreEvents {
 	ready: (data: { core: Core }) => void;
@@ -22,7 +23,7 @@ export interface CoreOptionsMeta {
 
 export interface CoreOptions {
 	modules?: (typeof BaseModule | MountedModule)[];
-	providers?: ProviderType[];
+	providers?: any[];
 	meta?: CoreOptionsMeta;
 }
 
@@ -77,6 +78,12 @@ export class Core extends EventEmitter {
 
 				module.instance.initialized = true;
 
+				this.providers.registerInstance(module.constructor, module.instance);
+
+				if (module.token) {
+					this.providers.registerInstance(module.token, module.instance);
+				}
+
 				Terminal.success(
 					'CORE',
 					`Successfully initialized module: ${Ansi.cyan(
@@ -92,6 +99,21 @@ export class Core extends EventEmitter {
 	}
 
 	registerModule(module: typeof BaseModule | MountedModule) {
+		const ModuleConstructor = (module as MountedModule).constructor || module;
+
+		const isModule = Reflect.getMetadata(MODULE_METADATA_KEY, ModuleConstructor);
+
+		if (!isModule) {
+			Terminal.error(
+				'CORE',
+				`The class ${Ansi.yellow(
+					ModuleConstructor.name
+				)} is not a valid module. Did you forget the ${Ansi.cyan('@Module()')} decorator?`
+			);
+
+			return;
+		}
+
 		if ((module as typeof BaseModule)?.mount) {
 			this.modules.push((module as typeof BaseModule).mount({}));
 		} else {
@@ -99,10 +121,18 @@ export class Core extends EventEmitter {
 		}
 	}
 
-	getModule<T extends typeof BaseModule>(module: T): InstanceType<T> | undefined {
-		const foundedModule = this.modules.find(m => m.constructor === module) as MountedModule | undefined;
+	instantiate<T>(ClassRef: { new (...args: any[]): T }): T {
+		return this.providers.instantiate(ClassRef);
+	}
 
-		return (foundedModule?.instance as InstanceType<T>) || undefined;
+	resolve<T = any>(token: ProviderToken): T | undefined {
+		return this.providers.resolve(token);
+	}
+
+	getModule<T extends typeof BaseModule>(module: T, token?: ProviderToken): InstanceType<T> | undefined {
+		if (token) return this.providers.resolve<InstanceType<T>>(token);
+
+		return this.providers.resolve<InstanceType<T>>(module);
 	}
 
 	static getInstance(options: CoreOptions = {}): Core {
@@ -120,9 +150,7 @@ export class Core extends EventEmitter {
 
 		Terminal.success(
 			'CORE',
-			`Successfully initialized ${Ansi.yellow(
-				this.modules.length
-			)} modules. ${Ansi.gray(`(${ms(elapsedTime)})`)}`
+			`Successfully initialized ${Ansi.yellow(this.modules.length)} modules. ${Ansi.gray(`(${ms(elapsedTime)})`)}`
 		);
 
 		Terminal.success('CORE', 'Successfully initialized.');

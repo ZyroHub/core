@@ -1,42 +1,45 @@
-export type ProviderType = { new (...args: any[]): any };
+import { PROVIDER_METADATA_KEY } from '@/decorators/provider.js';
+
+export type ProviderToken = any;
 
 export class ProvidersService {
-	private providers: Map<ProviderType, InstanceType<ProviderType>> = new Map();
+	private providers: Map<ProviderToken, any> = new Map();
 
-	resolve<T extends ProviderType>(provider: T): InstanceType<T> | undefined {
-		return this.providers.get(provider) as InstanceType<T>;
+	resolve<T = any>(token: ProviderToken): T | undefined {
+		return this.providers.get(token);
 	}
 
-	register(provider: ProviderType) {
-		const isProvider = Reflect.getMetadata('provider:isProvider', provider);
-		if (!isProvider) throw new Error('Invalid provider');
+	registerInstance(token: ProviderToken, instance: any) {
+		this.providers.set(token, instance);
+	}
 
-		const providerParams = Reflect.getMetadata('design:paramtypes', provider) || [];
-		const dependencies = this.resolveClasses(providerParams);
+	register(ProviderClass: any) {
+		if (this.providers.has(ProviderClass)) {
+			return this.providers.get(ProviderClass);
+		}
 
-		const instance = new provider(...dependencies);
+		const instance = this.instantiate(ProviderClass);
 
-		this.providers.set(provider, instance);
+		this.providers.set(ProviderClass, instance);
 		return instance;
 	}
 
-	registerInstance(provider: ProviderType, instance: InstanceType<ProviderType>) {
-		this.providers.set(provider, instance);
+	instantiate<T>(Target: { new (...args: any[]): T }): T {
+		const paramTypes = Reflect.getMetadata(PROVIDER_METADATA_KEY.PARAM_TYPES, Target) || [];
+		const injections = Reflect.getOwnMetadata(PROVIDER_METADATA_KEY.INJECT, Target) || {};
+
+		const dependencies = paramTypes.map((paramType: any, index: number) => {
+			const token = injections[index] || paramType;
+			const dependency = this.resolve(token);
+
+			return dependency;
+		});
+
+		return new Target(...dependencies);
 	}
 
-	unregister(provider: ProviderType) {
-		this.providers.delete(provider);
-	}
-
-	resolveClasses(providers: ProviderType[]) {
-		return providers.map(provider => this.resolve(provider));
-	}
-
-	initClassWithProviders<T extends ProviderType>(constructor: T): InstanceType<T> {
-		const providerParams = Reflect.getMetadata('design:paramtypes', constructor) || [];
-		const dependencies = this.resolveClasses(providerParams);
-
-		return new constructor(...dependencies);
+	unregister(token: ProviderToken) {
+		this.providers.delete(token);
 	}
 }
 
