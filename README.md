@@ -11,22 +11,22 @@
 - [ZyroHub - Core](#zyrohub---core)
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
+	- [TypeScript Configuration](#typescript-configuration)
 - [Basic Usage](#basic-usage)
-	- [Creating a Core Instance and importing Modules](#creating-a-core-instance-and-importing-modules)
-	- [Creating a Core Instance with Cluster Support](#creating-a-core-instance-with-cluster-support)
-		- [Cluster Options](#cluster-options)
-- [Creating Modules](#creating-modules)
-	- [Basic Module Structure](#basic-module-structure)
-	- [Importing your Module into Core](#importing-your-module-into-core)
-	- [Importing a Module into another Module](#importing-a-module-into-another-module)
-	- [Getting the Global Core Instance](#getting-the-global-core-instance)
-- [Providers](#providers)
-	- [Creating a Provider](#creating-a-provider)
-	- [Importing your Provider in Core](#importing-your-provider-in-core)
+	- [Creating a Core Instance](#creating-a-core-instance)
+	- [Cluster Support](#cluster-support)
+- [Modules](#modules)
+	- [Creating a Module (@Module)](#creating-a-module-module)
+	- [Configuration with .mount()](#configuration-with-mount)
+- [Dependency Injection (DI)](#dependency-injection-di)
+	- [Creating Services (@Injectable)](#creating-services-injectable)
+	- [Injecting Dependencies](#injecting-dependencies)
+	- [Token Injection (@Inject)](#token-injection-inject)
+	- [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
+- [Lifecycle](#lifecycle)
+	- [Initialization (init)](#initialization-init)
+	- [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
 - [Events](#events)
-	- [Core Events](#core-events)
-		- [Ready Event](#ready-event)
-		- [Module Initialized Event](#module-initialized-event)
 
 ## Getting Started
 
@@ -45,222 +45,252 @@ pnpm add @zyrohub/core
 bun add @zyrohub/core
 ```
 
+### TypeScript Configuration
+
+⚠️ **Important:** To use the Dependency Injection system, you **must** enable `emitDecoratorMetadata` in your `tsconfig.json`.
+
+```json
+{
+	"compilerOptions": {
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
+	}
+}
+```
+
 ## Basic Usage
 
-### Creating a Core Instance and importing Modules
+### Creating a Core Instance
 
-The modules are automatically initialized in order when the core instance is created. You can import and use other modules from the ZyroHub ecosystem (or custom modules) as needed.
-
-```typescript
-import { Core } from '@zyrohub/core';
-
-// Example modules
-import { AnotherModule } from '@zyrohub/another-module';
-import { SomeModule } from '@zyrohub/some-module';
-
-const core = new Core({
-	modules: [SomeModule, AnotherModule]
-});
-
-core.init();
-```
-
-### Creating a Core Instance with Cluster Support
-
-You can also create a Clustered Core instance to take advantage of multi-core systems. The clustered core will automatically manage worker processes for you.
-
-```typescript
-import { ClusteredCore } from '@zyrohub/core';
-
-// Example modules
-import { SomeModule } from '@zyrohub/some-module';
-import { AnotherModule } from '@zyrohub/another-module';
-
-const core = new ClusteredCore({
-	// You can pass core options here as well
-	core: {
-		modules: [SomeModule, AnotherModule]
-	}
-});
-
-core.init();
-```
-
-#### Cluster Options
-
-- `cpus`: (default: number of available CPU cores) Number of CPU cores to use.
-- `workers`: Additional arguments to pass to worker processes.
-    - `autoRestart`: Configuration for automatic worker restarts.
-        - `enabled`: (default: true) Whether to enable automatic restarts.
-        - `delay`: (default: 5000) Delay in milliseconds before restarting a worker.
-
-## Creating Modules
-
-### Basic Module Structure
-
-```typescript
-import { BaseModule } from '@zyrohub/core';
-
-export interface MyModuleOptions {
-	// Define your initial module options here
-}
-
-export class MyModule extends BaseModule {
-	static options: MyModuleOptions;
-
-	async init(data: { core: Core; options: MyModuleOptions }) {
-		console.log('MyModule initialized');
-	}
-}
-```
-
-### Importing your Module into Core
+The modules are automatically initialized in order when the core instance is created.
 
 ```typescript
 import { Core } from '@zyrohub/core';
 
-import { MyModule } from './path-to-my-module';
+import { MyModule } from './modules/MyModule.js';
 
 const core = new Core({
 	modules: [MyModule]
 });
 
-core.init();
+await core.init();
 ```
 
-### Importing a Module into another Module
+### Cluster Support
+
+You can also create a Clustered Core instance to take advantage of multi-core systems. The clustered core will automatically manage worker processes and restart them if they fail.
 
 ```typescript
-import { Core, BaseModule } from '@zyrohub/core';
+import { ClusteredCore } from '@zyrohub/core';
 
-// Importing another module to use within this module
-import { MyModule } from './path-to-my-module';
+import { MyModule } from './modules/MyModule.js';
 
-export interface CustomModuleOptions {
-	// ...
-
-	async init(data: { core: Core; options: CustomModuleOptions }) {
-		const myModule = data.core.getModule(MyModule);
-		// Use myModule as needed
+const core = new ClusteredCore({
+	core: {
+		modules: [MyModule]
+	},
+	settings: {
+		workers: {
+			autoRestart: { enabled: true, delay: 5000 }
+		}
 	}
-}
-```
-
-### Getting the Global Core Instance
-
-When needed, you can get the global core instance from anywhere in your application using the static method `Core.getInstance()`.
-
-```typescript
-import { Core } from '@zyrohub/core';
-
-const someFunction = () => {
-	// Get the global core instance
-	const core = Core.getInstance();
-};
-```
-
-## Providers
-
-The provider system allows modules to register and retrieve services or instances globally within the core ecosystem.
-
-- Observation: The `Core` instance is already registered as a provider automatically.
-
-### Creating a Provider
-
-```typescript
-import { Provider } from '@zyrohub/core';
-
-@Provider()
-export class AnyClass {
-	// Your class implementation
-}
-```
-
-### Importing your Provider in Core
-
-```typescript
-import { Core } from '@zyrohub/core';
-
-import { AnyClass } from './path-to-any-class';
-
-const core = new Core({
-	providers: [AnyClass]
 });
 
-core.init();
+await core.init();
 ```
 
-You can mannually inject a provider instance in Core or in a module using the `register` method:
+## Modules
+
+Modules are the building blocks of your application. Use the `@Module()` decorator to register a class as a module.
+
+### Creating a Module (@Module)
 
 ```typescript
-core.providers.registerInstance(AnyClass);
-```
+import { BaseModule, Module, type Core } from '@zyrohub/core';
+import { Terminal } from '@zyrohub/utilities';
 
-Using the provider in another class:
-
-```typescript
-import { ProviderReceiver } from '@zyrohub/core';
-
-import { AnyClass } from './path-to-any-class';
-
-// This decorator is optional, only needed if the class doesn't have another other decorator (to unlock reflect-metadata is needed at least one decorator)
-@ProviderReceiver()
-export class AnotherClass {
-	constructor(private anyClass: AnyClass) {
-		// Now you can use anyClass instance
+@Module()
+export class DatabaseModule extends BaseModule {
+	async init(data: { core: Core }) {
+		Terminal.success('DB', 'Database connected.');
 	}
 
-	async someMethod() {
-		this.anyClass; // Use the injected instance as needed
+	// Called when the application is shutting down
+	async shutdown() {
+		Terminal.info('DB', 'Closing connections...');
 	}
 }
 ```
 
-Now, you can inject `AnyClass` into any other class that is also registered as a provider.
+### Configuration with .mount()
+
+To pass options to a module before initialization, use the static `mount` method. These options are accessible in the `init` method via `data.options`.
 
 ```typescript
-import { AnotherClass } from './path-to-another-class';
+export interface HttpOptions {
+	port: number;
+}
 
-export class SomeModule extends BaseModule {
-	// ...
+@Module()
+export class HttpModule extends BaseModule {
+	static options: HttpOptions;
 
-	async init(data: { core: Core; options: CustomModuleOptions }) {
-		const anotherClassInstance = data.core.providers.initClassWithProviders(AnotherClass);
+	// Options passed in .mount() are received here
+	async init(data: { core: Core; options: HttpOptions }) {
+		const { port } = data.options;
+		console.log(`Server starting on port ${port}`);
+	}
+}
 
-		// Use anotherClassInstance as needed
-		anotherClassInstance.someMethod();
+// Usage
+const core = new Core({
+	modules: [
+		// Pass the configuration object here
+		HttpModule.mount({ port: 3000 })
+	]
+});
+```
+
+## Dependency Injection (DI)
+
+The `@zyrohub/core` has a DI container that resolves dependencies automatically. Modules are automatically registered as providers.
+
+### Creating Services (@Injectable)
+
+Use the `@Injectable()` decorator to mark a class as a provider that can be injected.
+
+```typescript
+import { Injectable } from '@zyrohub/core';
+
+@Injectable()
+export class UserService {
+	getAll() {
+		return ['User 1', 'User 2'];
 	}
 }
 ```
+
+### Injecting Dependencies
+
+You can inject services or other modules directly into the **constructor**.
+
+```typescript
+import { Module, BaseModule } from '@zyrohub/core';
+
+import { UserService } from './services/UserService.js';
+
+@Module()
+export class UserModule extends BaseModule {
+	// UserService is automatically injected here
+	constructor(private userService: UserService) {
+		super();
+	}
+
+	async init() {
+		console.log(this.userService.getAll());
+	}
+}
+```
+
+> **Note:** For circular dependencies or modules defined later in the list, use `core.getModule(TargetModule)` inside the `init()` method instead of constructor injection.
+
+### Token Injection (@Inject)
+
+You can assign a custom token to a module using the second argument of `.mount()`. This is especially useful for running multiple instances of the same module or injecting specific configurations.
+
+```typescript
+import { Inject, Module, BaseModule } from '@zyrohub/core';
+
+@Module()
+export class BotModule extends BaseModule {
+	constructor(@Inject('BOT_TOKEN') private token: string) {
+		super();
+	}
+}
+
+// Using .mount(options, token) to register with a custom token
+const core = new Core({
+	modules: [
+		// This module will be registered as 'BOT_SALES' in the provider container
+		BotModule.mount({ settings: '...' }, 'BOT_SALES'),
+
+		// This one as 'BOT_SUPPORT'
+		BotModule.mount({ settings: '...' }, 'BOT_SUPPORT')
+	]
+});
+```
+
+To consume these specific instances later:
+
+```typescript
+// Injecting by Token
+constructor(@Inject('BOT_SALES') private salesBot: BotModule) {}
+
+// Or resolving manually
+const supportBot = core.resolve('BOT_SUPPORT');
+```
+
+To consume these specific instances later:
+
+```typescript
+@Module()
+export class SalesController extends BaseModule {
+	// Injecting by Token
+	constructor(@Inject('BOT_SALES') private salesBot: BotModule) {
+		super();
+	}
+
+	async init() {
+		// Use salesBot instance...
+	}
+}
+
+// Or resolving manually
+const supportBot = core.resolve('BOT_SUPPORT');
+```
+
+### Core DI Methods (instantiate & resolve)
+
+The `Core` exposes methods to interact with the DI container manually, useful for Controllers or external scripts.
+
+```typescript
+// 1. Instantiate: Creates a NEW instance with dependencies injected (Transient)
+const userController = core.instantiate(UserController);
+
+// 2. Resolve: Retrieves an EXISTING singleton instance (Service or Module)
+const databaseModule = core.resolve(DatabaseModule);
+```
+
+## Lifecycle
+
+The framework manages the application lifecycle.
+
+### Initialization (init)
+
+1.  **Instantiation Phase:** All modules are instantiated and registered in the provider container.
+2.  **Initialization Phase:** The `init()` method of each module is called. It is safe to communicate with other modules here.
+
+### Graceful Shutdown (shutdown)
+
+The Core listens for system signals (`SIGINT`, `SIGTERM`). When received:
+
+1.  The `shutdown()` method is called on all modules, in **reverse order** of initialization.
+2.  The application exits gracefully.
 
 ## Events
 
-### Core Events
-
-The core and modules can emit and listen to events using the built-in event system.
-
-#### Ready Event
-
-The `ready` event is emitted when the core and all its modules have been initialized.
-
-- Data:
-- `core`: The core instance.
+The core emits events that you can listen to.
 
 ```typescript
-core.on('ready', data => {
-	console.log('Core and all modules are ready', data.core);
+core.on('ready', ({ core }) => {
+	console.log('Core is ready!');
 });
-```
 
-#### Module Initialized Event
+core.on('moduleInit', ({ module }) => {
+	console.log(`Module ${module.getName()} initialized.`);
+});
 
-The `moduleInit` event is emitted when a specific module has been initialized.
-
-- Data:
-- `module`: The initialized module instance.
-
-```typescript
-core.on('moduleInit', data => {
-	console.log('Module initialized:', data.module.getName());
+core.on('shutdown', () => {
+	console.log('Application shut down.');
 });
 ```
