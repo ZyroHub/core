@@ -2,7 +2,7 @@ import { Ansi, Terminal } from '@zyrohub/utilities';
 import ms from 'ms';
 import EventEmitter from 'node:events';
 
-import { BaseModule, MountedModule } from './components/Module.js';
+import { BaseModule, ModuleClass, MountedModule } from './components/Module.js';
 import { MODULE_METADATA_KEY } from './decorators/module.js';
 import { ProvidersService, ProviderToken } from './services/Providers.js';
 
@@ -22,7 +22,7 @@ export interface CoreOptionsMeta {
 }
 
 export interface CoreOptions {
-	modules?: (typeof BaseModule | MountedModule)[];
+	modules?: (ModuleClass | MountedModule)[];
 	providers?: any[];
 	meta?: CoreOptionsMeta;
 
@@ -74,6 +74,10 @@ export class Core extends EventEmitter {
 	private async initModules() {
 		for (const module of this.modules) {
 			try {
+				if (!module.instance) {
+					module.instance = this.providers.instantiate(module.constructor);
+				}
+
 				if (!module.instance) throw new Error('Module instance is not defined');
 
 				module.instance.core = this;
@@ -127,9 +131,8 @@ export class Core extends EventEmitter {
 		process.on('SIGTERM', () => shutdownHandler('SIGTERM'));
 	}
 
-	registerModule(module: typeof BaseModule | MountedModule) {
+	registerModule(module: ModuleClass | MountedModule) {
 		const ModuleConstructor = (module as MountedModule).constructor || module;
-
 		const isModule = Reflect.getMetadata(MODULE_METADATA_KEY, ModuleConstructor);
 
 		if (!isModule) {
@@ -139,14 +142,13 @@ export class Core extends EventEmitter {
 					ModuleConstructor.name
 				)} is not a valid module. Did you forget the ${Ansi.cyan('@Module()')} decorator?`
 			);
-
 			return;
 		}
 
-		if ((module as typeof BaseModule)?.mount) {
-			this.modules.push((module as typeof BaseModule).mount({}));
-		} else {
+		if ('options' in (module as any)) {
 			this.modules.push(module as MountedModule);
+		} else {
+			this.modules.push((module as ModuleClass).mount({}));
 		}
 	}
 

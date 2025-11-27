@@ -1,7 +1,12 @@
 import type { Core } from '@/Core.js';
 
+export type ModuleClass<T extends BaseModule = BaseModule> = {
+	new (...args: any[]): T;
+	mount: (options: any, token?: any) => MountedModule<any>;
+};
+
 export type MountedModule<T = any> = {
-	constructor: typeof BaseModule;
+	constructor: ModuleClass<any>;
 	instance?: BaseModule;
 	options: T;
 	token?: any;
@@ -20,13 +25,12 @@ export class BaseModule {
 	}
 
 	static mount<TMount extends (typeof BaseModule)['options']>(
-		this: typeof BaseModule & { options: TMount },
+		this: ModuleClass,
 		options: TMount,
 		token?: any
 	): MountedModule<TMount> {
 		return {
 			constructor: this,
-			instance: new this(),
 			options,
 			token
 		};
