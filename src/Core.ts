@@ -1,5 +1,4 @@
-import { Ansi, Terminal } from '@zyrohub/utilities';
-import ms from 'ms';
+import { Ansi, Terminal, Time } from '@zyrohub/utilities';
 import EventEmitter from 'node:events';
 
 import { BaseModule, ModuleClass, MountedModule } from './components/Module.js';
@@ -109,7 +108,7 @@ export class Core extends EventEmitter {
 
 				Terminal.success(
 					'CORE',
-					`Successfully initialized module: ${Ansi.cyan(moduleName)} ${Ansi.gray(`(${ms(duration)})`)}`
+					`Successfully initialized module: ${Ansi.cyan(moduleName)} ${Ansi.gray(`(${Time.duration(duration)})`)}`
 				);
 
 				this.emit('moduleInit', { module: module.instance });
@@ -219,7 +218,7 @@ export class Core extends EventEmitter {
 
 		Terminal.success(
 			'CORE',
-			`Successfully initialized ${Ansi.yellow(this.modules.length)} modules. ${Ansi.gray(`(${ms(elapsedTime)})`)}`
+			`Successfully initialized ${Ansi.yellow(this.modules.length)} modules. ${Ansi.gray(`(${Time.duration(elapsedTime)})`)}`
 		);
 
 		Terminal.success('CORE', 'Successfully initialized.');

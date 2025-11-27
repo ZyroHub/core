@@ -28,12 +28,10 @@
 	"keywords": [],
 	"license": "MIT",
 	"dependencies": {
-		"@zyrohub/utilities": "^1.0.9",
-		"ms": "^2.1.3",
+		"@zyrohub/utilities": "^1.0.10",
 		"reflect-metadata": "^0.2.2"
 	},
 	"devDependencies": {
-		"@types/ms": "^2.1.0",
 		"@types/node": "^24.5.2",
 		"@zyrohub/config-prettier": "^1.0.5",
 		"tsc-alias": "^1.8.16",

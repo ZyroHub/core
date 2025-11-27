@@ -1,5 +1,4 @@
-import { Ansi, Terminal } from '@zyrohub/utilities';
-import ms from 'ms';
+import { Ansi, Terminal, Time } from '@zyrohub/utilities';
 import cluster, { Worker } from 'node:cluster';
 import EventEmitter from 'node:events';
 import os from 'node:os';
@@ -124,7 +123,7 @@ export class ClusteredCore extends EventEmitter {
 
 		Terminal.success(
 			'CLUSTER',
-			`Successfully initialized ${Ansi.yellow(cpuCount)} workers. ${Ansi.gray(`(${ms(elapsedTime)})`)}`
+			`Successfully initialized ${Ansi.yellow(cpuCount)} workers. ${Ansi.gray(`(${Time.duration(elapsedTime)})`)}`
 		);
 
 		this.emit('ready', { clusteredCore: this });
