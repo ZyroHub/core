@@ -1,6 +1,6 @@
 {
 	"name": "@zyrohub/core",
-	"version": "1.1.3",
+	"version": "1.1.4",
 	"author": "DMVMarcio",
 	"type": "module",
 	"description": "The core module of ZyroHub ecosystem.",

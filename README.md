@@ -20,7 +20,7 @@
     - [Configuration with .mount()](#configuration-with-mount)
     - [Getting a Module Instance](#getting-a-module-instance)
 - [Dependency Injection (DI)](#dependency-injection-di)
-    - [Creating Services (@Injectable)](#creating-services-injectable)
+    - [Creating Services (@Provider)](#creating-services-provider)
     - [Injecting Dependencies](#injecting-dependencies)
     - [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
     - [Token Injection (@Inject)](#token-injection-inject)
@@ -180,14 +180,14 @@ const databaseModule = this.core.getModuleOrThrow(DatabaseModule, 'CUSTOM_DB_TOK
 
 The `@zyrohub/core` has a DI container that resolves dependencies automatically. Modules are automatically registered as providers.
 
-### Creating Services (@Injectable)
+### Creating Services (@Provider)
 
-Use the `@Injectable()` decorator to mark a class as a provider that can be injected.
+Use the `@Provider()` decorator to mark a class as a provider that can be injected.
 
 ```typescript
-import { Injectable } from '@zyrohub/core';
+import { Provider } from '@zyrohub/core';
 
-@Injectable()
+@Provider()
 export class UserService {
 	getAll() {
 		return ['User 1', 'User 2'];
@@ -224,13 +224,13 @@ export class UserModule extends BaseModule {
 You can also inject dependencies into any class (not just modules) using the `Core` instance.
 
 ```typescript
-import { Core } from '@zyrohub/core';
+import { Core, Injectable } from '@zyrohub/core';
+
 import { UserService } from './services/UserService.js';
 
+@Injectable()
 export class UserController {
-	constructor(private userService: UserService) {
-		super();
-	}
+	constructor(private userService: UserService) {}
 
 	async getUsers() {
 		return await this.userService.getAll();
