@@ -9,6 +9,13 @@ export class ProvidersService {
 		return this.providers.get(token);
 	}
 
+	resolveOrThrow<T = any>(token: ProviderToken): T {
+		const provider = this.resolve<T>(token);
+		if (!provider) throw new Error(`Provider for token ${token.toString()} not found.`);
+
+		return provider;
+	}
+
 	registerInstance(token: ProviderToken, instance: any) {
 		this.providers.set(token, instance);
 	}

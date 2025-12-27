@@ -175,6 +175,10 @@ export class Core extends EventEmitter {
 		return this.providers.resolve(token);
 	}
 
+	resolveOrThrow<T = any>(token: ProviderToken): T {
+		return this.providers.resolveOrThrow<T>(token);
+	}
+
 	getModule<T extends typeof BaseModule>(module: T, token?: ProviderToken): InstanceType<T> | undefined {
 		if (token) return this.providers.resolve<InstanceType<T>>(token);
 
