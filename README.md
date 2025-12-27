@@ -11,21 +11,23 @@
 - [ZyroHub - Core](#zyrohub---core)
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
-	- [TypeScript Configuration](#typescript-configuration)
+    - [TypeScript Configuration](#typescript-configuration)
 - [Basic Usage](#basic-usage)
-	- [Creating a Core Instance](#creating-a-core-instance)
-	- [Cluster Support](#cluster-support)
+    - [Creating a Core Instance](#creating-a-core-instance)
+    - [Cluster Support](#cluster-support)
 - [Modules](#modules)
-	- [Creating a Module (@Module)](#creating-a-module-module)
-	- [Configuration with .mount()](#configuration-with-mount)
+    - [Creating a Module (@Module)](#creating-a-module-module)
+    - [Configuration with .mount()](#configuration-with-mount)
+    - [Getting a Module Instance](#getting-a-module-instance)
 - [Dependency Injection (DI)](#dependency-injection-di)
-	- [Creating Services (@Injectable)](#creating-services-injectable)
-	- [Injecting Dependencies](#injecting-dependencies)
-	- [Token Injection (@Inject)](#token-injection-inject)
-	- [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
+    - [Creating Services (@Injectable)](#creating-services-injectable)
+    - [Injecting Dependencies](#injecting-dependencies)
+    - [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
+    - [Token Injection (@Inject)](#token-injection-inject)
+    - [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
 - [Lifecycle](#lifecycle)
-	- [Initialization (init)](#initialization-init)
-	- [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
+    - [Initialization (init)](#initialization-init)
+    - [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
 - [Events](#events)
 
 ## Getting Started
@@ -151,6 +153,29 @@ const core = new Core({
 });
 ```
 
+### Getting a Module Instance
+
+You can retrieve a module instance from the core using the `getModule()` or `getModuleOrThrow()` method.
+
+```typescript
+import { Module, BaseModule, type Core } from '@zyrohub/core';
+
+@Module()
+export class UserModule extends BaseModule {
+	async init() {
+		const databaseModule = this.core.getModuleOrThrow(DatabaseModule);
+	}
+}
+```
+
+> You can also provide a token if the module was registered with one.
+
+```typescript
+const databaseModule = this.core.getModuleOrThrow(DatabaseModule, 'CUSTOM_DB_TOKEN');
+```
+
+> You can also use dependency injection to get module instances directly in the constructor. See [Injecting Dependencies](#injecting-dependencies) for more details.
+
 ## Dependency Injection (DI)
 
 The `@zyrohub/core` has a DI container that resolves dependencies automatically. Modules are automatically registered as providers.
@@ -193,6 +218,39 @@ export class UserModule extends BaseModule {
 ```
 
 > **Note:** For circular dependencies or modules defined later in the list, use `core.getModule(TargetModule)` inside the `init()` method instead of constructor injection.
+
+### Injecting Dependencies in Any Class
+
+You can also inject dependencies into any class (not just modules) using the `Core` instance.
+
+```typescript
+import { Core } from '@zyrohub/core';
+import { UserService } from './services/UserService.js';
+
+export class UserController {
+	constructor(private userService: UserService) {
+		super();
+	}
+
+	async getUsers() {
+		return await this.userService.getAll();
+	}
+}
+```
+
+```typescript
+import { Module, BaseModule, type Core } from '@zyrohub/core';
+
+import { UserController } from './controllers/UserController.js';
+
+@Module()
+export class UserModule extends BaseModule {
+	async init() {
+		const userController = this.core.instantiate(UserController);
+		console.log(await userController.getUsers());
+	}
+}
+```
 
 ### Token Injection (@Inject)
 

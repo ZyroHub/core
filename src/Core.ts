@@ -181,6 +181,13 @@ export class Core extends EventEmitter {
 		return this.providers.resolve<InstanceType<T>>(module);
 	}
 
+	getModuleOrThrow<T extends typeof BaseModule>(module: T, token?: ProviderToken): InstanceType<T> {
+		const foundedModule = this.getModule<T>(module, token);
+		if (!foundedModule) throw new Error(`Module ${module.name} not found in Core.`);
+
+		return foundedModule;
+	}
+
 	static getInstance(options: CoreOptions = {}): Core {
 		return Core.instance || new Core(options);
 	}
