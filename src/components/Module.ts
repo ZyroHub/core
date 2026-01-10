@@ -25,7 +25,7 @@ export class BaseModule {
 	}
 
 	static mount<TMount extends (typeof BaseModule)['options']>(
-		this: ModuleClass,
+		this: ModuleClass & { options: TMount },
 		options: TMount,
 		token?: any
 	): MountedModule<TMount> {
