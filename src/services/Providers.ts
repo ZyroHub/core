@@ -2,6 +2,18 @@ import { PROVIDER_METADATA_KEY } from '@/decorators/provider.js';
 
 export type ProviderToken = any;
 
+export interface ClassProvider {
+	provide: ProviderToken;
+	useClass: any;
+}
+
+export interface ValueProvider {
+	provide: ProviderToken;
+	useValue: any;
+}
+
+export type ProviderType = any | ClassProvider | ValueProvider;
+
 export class ProvidersService {
 	private providers: Map<ProviderToken, any> = new Map();
 
@@ -20,14 +32,27 @@ export class ProvidersService {
 		this.providers.set(token, instance);
 	}
 
-	register(ProviderClass: any) {
-		if (this.providers.has(ProviderClass)) {
-			return this.providers.get(ProviderClass);
+	register(provider: ProviderType) {
+		if (this.isValueProvider(provider)) {
+			this.providers.set(provider.provide, provider.useValue);
+
+			return provider.useValue;
 		}
 
-		const instance = this.instantiate(ProviderClass);
+		if (this.isClassProvider(provider)) {
+			const instance = this.instantiate(provider.useClass);
+			this.providers.set(provider.provide, instance);
 
-		this.providers.set(ProviderClass, instance);
+			return instance;
+		}
+
+		if (this.providers.has(provider)) {
+			return this.providers.get(provider);
+		}
+
+		const instance = this.instantiate(provider);
+		this.providers.set(provider, instance);
+
 		return instance;
 	}
 
@@ -47,6 +72,14 @@ export class ProvidersService {
 
 	unregister(token: ProviderToken) {
 		this.providers.delete(token);
+	}
+
+	private isValueProvider(provider: any): provider is ValueProvider {
+		return provider && typeof provider === 'object' && 'useValue' in provider;
+	}
+
+	private isClassProvider(provider: any): provider is ClassProvider {
+		return provider && typeof provider === 'object' && 'useClass' in provider;
 	}
 }
 
