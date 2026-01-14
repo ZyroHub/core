@@ -11,26 +11,26 @@
 - [ZyroHub - Core](#zyrohub---core)
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
-	- [TypeScript Configuration](#typescript-configuration)
+    - [TypeScript Configuration](#typescript-configuration)
 - [Basic Usage](#basic-usage)
-	- [Creating a Core Instance](#creating-a-core-instance)
-	- [Cluster Support](#cluster-support)
+    - [Creating a Core Instance](#creating-a-core-instance)
+    - [Cluster Support](#cluster-support)
 - [Modules](#modules)
-	- [Creating a Module (@Module)](#creating-a-module-module)
-	- [Configuration with .mount()](#configuration-with-mount)
-	- [Getting a Module Instance](#getting-a-module-instance)
+    - [Creating a Module (@Module)](#creating-a-module-module)
+    - [Configuration with .mount()](#configuration-with-mount)
+    - [Getting a Module Instance](#getting-a-module-instance)
 - [Dependency Injection (DI)](#dependency-injection-di)
-	- [Creating Providers/Services (@Provider)](#creating-providersservices-provider)
-	- [Injecting Dependencies](#injecting-dependencies)
-	- [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
-	- [Token Injection (@Inject)](#token-injection-inject)
-	- [Custom Providers](#custom-providers)
-		- [Custom Provider with useClass](#custom-provider-with-useclass)
-		- [Custom Provider with useValue](#custom-provider-with-usevalue)
-	- [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
+    - [Creating Providers/Services (@Provider)](#creating-providersservices-provider)
+    - [Injecting Dependencies](#injecting-dependencies)
+    - [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
+    - [Token Injection (@Inject)](#token-injection-inject)
+    - [Custom Providers](#custom-providers)
+        - [Custom Provider with useClass](#custom-provider-with-useclass)
+        - [Custom Provider with useValue](#custom-provider-with-usevalue)
+    - [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
 - [Lifecycle](#lifecycle)
-	- [Initialization (init)](#initialization-init)
-	- [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
+    - [Initialization (init)](#initialization-init)
+    - [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
 - [Events](#events)
 
 ## Getting Started
@@ -293,9 +293,12 @@ To consume these specific instances later:
 
 ```typescript
 @Module()
-export class SalesController extends BaseModule {
+export class SalesModule extends BaseModule {
 	// Injecting by Token
-	constructor(@Inject('BOT_SALES') private salesBot: BotModule) {
+	constructor(
+		@Inject('BOT_SALES') private salesBot: BotModule,
+		@Inject('BOT_SUPPORT') private supportBot: BotModule
+	) {
 		super();
 	}
 
@@ -306,6 +309,7 @@ export class SalesController extends BaseModule {
 }
 
 // Or resolving manually
+const salesBot = core.resolve('BOT_SALES');
 const supportBot = core.resolve('BOT_SUPPORT');
 ```
 
