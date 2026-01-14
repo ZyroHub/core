@@ -13,7 +13,8 @@
 		}
 	},
 	"scripts": {
-		"build": "tsc && tsc-alias"
+		"build": "tsc && tsc-alias",
+		"dev": "ztsc --watch src/index.ts"
 	},
 	"repository": {
 		"type": "git",
@@ -34,6 +35,7 @@
 	"devDependencies": {
 		"@types/node": "^24.5.2",
 		"@zyrohub/config-prettier": "^1.0.5",
+		"@zyrohub/ts-runner": "^0.0.3",
 		"tsc-alias": "^1.8.16",
 		"typescript": "^5.9.2"
 	}

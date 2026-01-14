@@ -11,23 +11,26 @@
 - [ZyroHub - Core](#zyrohub---core)
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
-    - [TypeScript Configuration](#typescript-configuration)
+	- [TypeScript Configuration](#typescript-configuration)
 - [Basic Usage](#basic-usage)
-    - [Creating a Core Instance](#creating-a-core-instance)
-    - [Cluster Support](#cluster-support)
+	- [Creating a Core Instance](#creating-a-core-instance)
+	- [Cluster Support](#cluster-support)
 - [Modules](#modules)
-    - [Creating a Module (@Module)](#creating-a-module-module)
-    - [Configuration with .mount()](#configuration-with-mount)
-    - [Getting a Module Instance](#getting-a-module-instance)
+	- [Creating a Module (@Module)](#creating-a-module-module)
+	- [Configuration with .mount()](#configuration-with-mount)
+	- [Getting a Module Instance](#getting-a-module-instance)
 - [Dependency Injection (DI)](#dependency-injection-di)
-    - [Creating Services (@Provider)](#creating-services-provider)
-    - [Injecting Dependencies](#injecting-dependencies)
-    - [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
-    - [Token Injection (@Inject)](#token-injection-inject)
-    - [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
+	- [Creating Providers/Services (@Provider)](#creating-providersservices-provider)
+	- [Injecting Dependencies](#injecting-dependencies)
+	- [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
+	- [Token Injection (@Inject)](#token-injection-inject)
+	- [Custom Providers](#custom-providers)
+		- [Custom Provider with useClass](#custom-provider-with-useclass)
+		- [Custom Provider with useValue](#custom-provider-with-usevalue)
+	- [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
 - [Lifecycle](#lifecycle)
-    - [Initialization (init)](#initialization-init)
-    - [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
+	- [Initialization (init)](#initialization-init)
+	- [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
 - [Events](#events)
 
 ## Getting Started
@@ -180,7 +183,7 @@ const databaseModule = this.core.getModuleOrThrow(DatabaseModule, 'CUSTOM_DB_TOK
 
 The `@zyrohub/core` has a DI container that resolves dependencies automatically. Modules are automatically registered as providers.
 
-### Creating Services (@Provider)
+### Creating Providers/Services (@Provider)
 
 Use the `@Provider()` decorator to mark a class as a provider that can be injected.
 
@@ -257,12 +260,20 @@ export class UserModule extends BaseModule {
 You can assign a custom token to a module using the second argument of `.mount()`. This is especially useful for running multiple instances of the same module or injecting specific configurations.
 
 ```typescript
-import { Inject, Module, BaseModule } from '@zyrohub/core';
+import { Module, BaseModule, Core } from '@zyrohub/core';
 
 @Module()
 export class BotModule extends BaseModule {
-	constructor(@Inject('BOT_TOKEN') private token: string) {
+	constructor() {
 		super();
+	}
+
+	async test() {
+		// ...
+	}
+
+	async init() {
+		// ...
 	}
 }
 
@@ -281,16 +292,6 @@ const core = new Core({
 To consume these specific instances later:
 
 ```typescript
-// Injecting by Token
-constructor(@Inject('BOT_SALES') private salesBot: BotModule) {}
-
-// Or resolving manually
-const supportBot = core.resolve('BOT_SUPPORT');
-```
-
-To consume these specific instances later:
-
-```typescript
 @Module()
 export class SalesController extends BaseModule {
 	// Injecting by Token
@@ -300,11 +301,108 @@ export class SalesController extends BaseModule {
 
 	async init() {
 		// Use salesBot instance...
+		this.salesBot.test();
 	}
 }
 
 // Or resolving manually
 const supportBot = core.resolve('BOT_SUPPORT');
+```
+
+### Custom Providers
+
+#### Custom Provider with useClass
+
+You can create custom providers by defining an interface and implementing it in different classes. Then, you can register the desired implementation in the core's provider container using tokens.
+
+```typescript
+interface IUserRepository {
+	getUser(id: string): Promise<{ id: string; name: string } | undefined>;
+}
+
+class UserRepositoryMap implements IUserRepository {
+	private users = new Map<string, { id: string; name: string }>([
+		['1', { id: '1', name: 'm-Alice' }],
+		['2', { id: '2', name: 'm-Bob' }]
+	]);
+
+	async getUser(id: string): Promise<{ id: string; name: string } | undefined> {
+		console.log('Searching for user in map repository');
+		return this.users.get(id);
+	}
+}
+
+class UserRepositoryArray implements IUserRepository {
+	private users = [
+		{ id: '1', name: 'a-Alice' },
+		{ id: '2', name: 'a-Bob' }
+	];
+
+	async getUser(id: string): Promise<{ id: string; name: string } | undefined> {
+		console.log('Searching for user in array repository');
+		return this.users.find(user => user.id === id);
+	}
+}
+```
+
+using the custom provider in a module or service via @Inject:
+
+```typescript
+interface TestModuleOptions {}
+
+@Module()
+class TestModule extends BaseModule {
+	static options: TestModuleOptions;
+
+	constructor(@Inject('IUserRepository') private userRepository: IUserRepository) {
+		super();
+	}
+
+	async init(data: { core: Core; options: TestModuleOptions }) {
+		console.log('- getting user with id "1":', this.userRepository.getUser('1'));
+	}
+}
+```
+
+Registering the desired implementation in the Core:
+
+```typescript
+const core = new Core({
+	modules: [TestModule],
+	providers: [{ provide: 'IUserRepository', useClass: UserRepositoryArray }]
+});
+
+core.init();
+```
+
+#### Custom Provider with useValue
+
+You can also use `useValue` to register a raw value as a provider:
+
+```typescript
+interface TestModuleOptions {}
+
+@Module()
+class TestModule extends BaseModule {
+	static options: TestModuleOptions;
+
+	constructor(@Inject('APP_NAME') private appName: string) {
+		super();
+	}
+
+	async init(data: { core: Core; options: TestModuleOptions }) {
+		console.log('- App Name:', this.appName);
+	}
+}
+```
+
+```typescript
+const core = new Core({
+	modules: [TestModule],
+	providers: [{ provide: 'APP_NAME', useValue: 'My Awesome App' }]
+});
+
+core.init();
 ```
 
 ### Core DI Methods (instantiate & resolve)

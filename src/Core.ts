@@ -3,7 +3,7 @@ import EventEmitter from 'node:events';
 
 import { BaseModule, ModuleClass, MountedModule } from './components/Module.js';
 import { MODULE_METADATA_KEY } from './decorators/module.js';
-import { ProvidersService, ProviderToken } from './services/Providers.js';
+import { ProvidersService, ProviderToken, ProviderType } from './services/Providers.js';
 
 interface CoreEvents {
 	ready: (data: { core: Core }) => void;
@@ -22,7 +22,7 @@ export interface CoreOptionsMeta {
 
 export interface CoreOptions {
 	modules?: (ModuleClass | MountedModule)[];
-	providers?: any[];
+	providers?: ProviderType[];
 	meta?: CoreOptionsMeta;
 
 	enableGracefulShutdown?: boolean;
