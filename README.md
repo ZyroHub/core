@@ -23,8 +23,8 @@
     - [Creating Providers/Services (@Provider)](#creating-providersservices-provider)
     - [Injecting Dependencies](#injecting-dependencies)
     - [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
-    - [Token Injection (@Inject)](#token-injection-inject)
-    - [Custom Providers](#custom-providers)
+    - [Module Token Injection (@Inject)](#module-token-injection-inject)
+    - [Custom Providers (@Inject)](#custom-providers-inject)
         - [Custom Provider with useClass](#custom-provider-with-useclass)
         - [Custom Provider with useValue](#custom-provider-with-usevalue)
     - [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
@@ -255,7 +255,7 @@ export class UserModule extends BaseModule {
 }
 ```
 
-### Token Injection (@Inject)
+### Module Token Injection (@Inject)
 
 You can assign a custom token to a module using the second argument of `.mount()`. This is especially useful for running multiple instances of the same module or injecting specific configurations.
 
@@ -313,7 +313,7 @@ const salesBot = core.resolve('BOT_SALES');
 const supportBot = core.resolve('BOT_SUPPORT');
 ```
 
-### Custom Providers
+### Custom Providers (@Inject)
 
 #### Custom Provider with useClass
 
