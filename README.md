@@ -11,26 +11,26 @@
 - [ZyroHub - Core](#zyrohub---core)
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
-	- [TypeScript Configuration](#typescript-configuration)
+    - [TypeScript Configuration](#typescript-configuration)
 - [Basic Usage](#basic-usage)
-	- [Creating a Core Instance](#creating-a-core-instance)
-	- [Cluster Support](#cluster-support)
+    - [Creating a Core Instance](#creating-a-core-instance)
+    - [Cluster Support](#cluster-support)
 - [Modules](#modules)
-	- [Creating a Module (@Module)](#creating-a-module-module)
-	- [Configuration with .mount()](#configuration-with-mount)
-	- [Getting a Module Instance](#getting-a-module-instance)
+    - [Creating a Module (@Module)](#creating-a-module-module)
+    - [Configuration with .mount()](#configuration-with-mount)
+    - [Getting a Module Instance](#getting-a-module-instance)
 - [Dependency Injection (DI)](#dependency-injection-di)
-	- [Creating Providers/Services (@Provider)](#creating-providersservices-provider)
-	- [Injecting Dependencies](#injecting-dependencies)
-	- [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
-	- [Module Token Injection (@Inject)](#module-token-injection-inject)
-	- [Custom Providers (@Inject)](#custom-providers-inject)
-		- [Custom Provider with useClass](#custom-provider-with-useclass)
-		- [Custom Provider with useValue](#custom-provider-with-usevalue)
-	- [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
+    - [Creating Providers/Services (@Provider)](#creating-providersservices-provider)
+    - [Injecting Dependencies](#injecting-dependencies)
+    - [Injecting Dependencies in Any Class](#injecting-dependencies-in-any-class)
+    - [Module Token Injection (@Inject)](#module-token-injection-inject)
+    - [Custom Providers (@Inject)](#custom-providers-inject)
+        - [Custom Provider with useClass](#custom-provider-with-useclass)
+        - [Custom Provider with useValue](#custom-provider-with-usevalue)
+    - [Core DI Methods (instantiate \& resolve)](#core-di-methods-instantiate--resolve)
 - [Lifecycle](#lifecycle)
-	- [Initialization (init)](#initialization-init)
-	- [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
+    - [Initialization (init)](#initialization-init)
+    - [Graceful Shutdown (shutdown)](#graceful-shutdown-shutdown)
 - [Events](#events)
 
 ## Getting Started
@@ -198,6 +198,17 @@ export class UserService {
 }
 ```
 
+After creating a provider or service, you can simply insert it into the core:
+
+```typescript
+const core = new Core({
+	modules: [], // will be automatically injected into the necessary modules or providers
+	providers: [UserService] // dependencies to be injected
+});
+
+core.init();
+```
+
 ### Injecting Dependencies
 
 You can inject services or other modules directly into the **constructor**.
@@ -209,7 +220,7 @@ import { UserService } from './services/UserService.js';
 
 @Module()
 export class UserModule extends BaseModule {
-	// UserService is automatically injected here
+	// UserService is automatically injected here (if added to the core providers list)
 	constructor(private userService: UserService) {
 		super();
 	}
