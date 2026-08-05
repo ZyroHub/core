@@ -121,7 +121,7 @@ export class Core extends EventEmitter {
 	private handleModuleError(module: MountedModule, error: unknown) {
 		const moduleName = module.instance?.getName?.() || module.constructor.name;
 
-		Terminal.error('CORE', [`Failed to initialize module: ${moduleName}`, error]);
+		Terminal.error('CORE', [`Failed to initialize module: ${Ansi.yellow(moduleName)}\n`, error]);
 
 		process.exit(1);
 	}

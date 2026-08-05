@@ -1,4 +1,5 @@
 import { PROVIDER_METADATA_KEY } from '@/decorators/provider.js';
+import { Ansi } from '@zyrohub/utilities';
 
 export type ProviderToken = any;
 
@@ -23,7 +24,7 @@ export class ProvidersService {
 
 	resolveOrThrow<T = any>(token: ProviderToken): T {
 		const provider = this.resolve<T>(token);
-		if (!provider) throw new Error(`Provider for token ${token.toString()} not found.`);
+		if (provider === undefined) throw new Error(`Provider for token ${token.toString()} not found.`);
 
 		return provider;
 	}
@@ -57,15 +58,28 @@ export class ProvidersService {
 	}
 
 	instantiate<T>(Target: { new (...args: any[]): T }): T {
-		const paramTypes = Reflect.getMetadata(PROVIDER_METADATA_KEY.PARAM_TYPES, Target) || [];
+		const paramTypes: any[] = Reflect.getMetadata(PROVIDER_METADATA_KEY.PARAM_TYPES, Target) || [];
 		const injections = Reflect.getOwnMetadata(PROVIDER_METADATA_KEY.INJECT, Target) || {};
 
 		const dependencies = paramTypes.map((paramType: any, index: number) => {
 			const token = injections[index] || paramType;
 			const dependency = this.resolve(token);
 
-			return dependency;
+			return { token: token, value: dependency };
 		});
+
+		const unresolvedDependencies = dependencies.filter(dependency => dependency.value === undefined);
+		if (unresolvedDependencies.length) {
+			const unresolvedTokensText = unresolvedDependencies
+				.map(dependency => {
+					if (dependency.token?.name) return dependency.token.name;
+
+					return String(dependency.token);
+				})
+				.map(dependency => `${Ansi.magenta(dependency)}`)
+				.join(', ');
+			throw new Error(`Provider for tokens ${unresolvedTokensText} in ${Ansi.yellow(Target.name)} not found.`);
+		}
 
 		return new Target(...dependencies);
 	}
