@@ -63,9 +63,9 @@ export class ProvidersService {
 
 		const dependencies = paramTypes.map((paramType: any, index: number) => {
 			const token = injections[index] || paramType;
-			const dependency = this.resolve(token);
+			const resolvedValue = this.resolve(token);
 
-			return { token: token, value: dependency };
+			return { token: token, value: resolvedValue };
 		});
 
 		const unresolvedDependencies = dependencies.filter(dependency => dependency.value === undefined);
@@ -81,7 +81,7 @@ export class ProvidersService {
 			throw new Error(`Provider for tokens ${unresolvedTokensText} in ${Ansi.yellow(Target.name)} not found.`);
 		}
 
-		return new Target(...dependencies);
+		return new Target(...dependencies.map(dependency => dependency.value));
 	}
 
 	unregister(token: ProviderToken) {
